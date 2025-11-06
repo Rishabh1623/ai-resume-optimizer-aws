@@ -100,29 +100,49 @@ def lambda_handler(event, context):
 def find_job_description(bucket, user_folder, resume_key):
     """
     Look for job description file in same folder
+    Supports both .txt and .pdf files
     Patterns:
-    - user123/job-description.txt
-    - user123/jd.txt
-    - user123/job.txt
+    - user123/job-description.txt or .pdf
+    - user123/jd.txt or .pdf
+    - user123/job.txt or .pdf
     """
     if not user_folder:
         # No user folder, check for JD in root
-        jd_patterns = ['job-description.txt', 'jd.txt', 'job.txt']
+        jd_patterns = [
+            'job-description.txt', 'job-description.pdf',
+            'jd.txt', 'jd.pdf',
+            'job.txt', 'job.pdf',
+            'job-desc.txt', 'job-desc.pdf'
+        ]
     else:
         # Check in user folder
         jd_patterns = [
             f"{user_folder}/job-description.txt",
+            f"{user_folder}/job-description.pdf",
             f"{user_folder}/jd.txt",
+            f"{user_folder}/jd.pdf",
             f"{user_folder}/job.txt",
-            f"{user_folder}/job-desc.txt"
+            f"{user_folder}/job.pdf",
+            f"{user_folder}/job-desc.txt",
+            f"{user_folder}/job-desc.pdf"
         ]
     
     for pattern in jd_patterns:
         try:
-            response = s3.get_object(Bucket=bucket, Key=pattern)
-            jd_text = response['Body'].read().decode('utf-8')
-            print(f"✓ Found JD: {pattern}")
-            return jd_text
+            # Check if file exists
+            s3.head_object(Bucket=bucket, Key=pattern)
+            
+            # Extract text based on file type
+            if pattern.endswith('.pdf'):
+                jd_text = extract_text_from_pdf(bucket, pattern)
+            else:
+                response = s3.get_object(Bucket=bucket, Key=pattern)
+                jd_text = response['Body'].read().decode('utf-8')
+            
+            if jd_text:
+                print(f"✓ Found JD: {pattern}")
+                return jd_text
+                
         except s3.exceptions.NoSuchKey:
             continue
         except Exception as e:
@@ -130,6 +150,30 @@ def find_job_description(bucket, user_folder, resume_key):
             continue
     
     return None
+
+def extract_text_from_pdf(bucket, key):
+    """Extract text from PDF using Textract"""
+    try:
+        response = textract.detect_document_text(
+            Document={
+                'S3Object': {
+                    'Bucket': bucket,
+                    'Name': key
+                }
+            }
+        )
+        
+        # Extract text from all blocks
+        text = ''
+        for block in response.get('Blocks', []):
+            if block['BlockType'] == 'LINE':
+                text += block['Text'] + '\n'
+        
+        return text
+        
+    except Exception as e:
+        print(f"Error extracting PDF text: {e}")
+        return None
 
 def extract_resume_text(bucket, key):
     """Extract text from PDF using Textract"""

@@ -349,20 +349,26 @@ aws dynamodb describe-table \
 3. **Create a folder** with your name (e.g., `john-doe/`)
 4. **Upload TWO files** to this folder:
    - `resume.pdf` - Your resume
-   - `job-description.txt` - The job description you're targeting
+   - `job-description.txt` OR `job-description.pdf` - The job description
 
 **Example structure:**
 ```
 s3://resume-optimizer-dev-input-abc123/
 ├── john-doe/
 │   ├── resume.pdf              ← Your resume
-│   └── job-description.txt     ← Target job description
+│   └── job-description.pdf     ← Target job (PDF or TXT)
 └── jane-smith/
     ├── resume.pdf
-    └── job-description.txt
+    └── jd.txt                  ← Also works! (jd.txt or jd.pdf)
 ```
 
-**Job Description File (job-description.txt):**
+**Supported Job Description File Names:**
+- ✅ `job-description.txt` or `job-description.pdf`
+- ✅ `jd.txt` or `jd.pdf`
+- ✅ `job.txt` or `job.pdf`
+- ✅ `job-desc.txt` or `job-desc.pdf`
+
+**Job Description Content (if using .txt):**
 ```
 Senior Software Engineer
 
@@ -380,7 +386,7 @@ Requirements:
 ```
 
 **Alternative: Upload resume only (generic optimization)**
-- If you don't upload `job-description.txt`, the system will do generic optimization
+- If you don't upload a job description file, the system will do generic optimization
 - Still improves ATS score, but not tailored to specific job
 
 **Watch the Agent Work (Real-time!):**
@@ -416,8 +422,10 @@ USER_FOLDER="john-doe"
 # Upload resume
 aws s3 cp your-resume.pdf s3://$INPUT_BUCKET/$USER_FOLDER/resume.pdf
 
-# Upload job description
+# Upload job description (TXT or PDF)
 aws s3 cp job-description.txt s3://$INPUT_BUCKET/$USER_FOLDER/job-description.txt
+# OR
+aws s3 cp job-description.pdf s3://$INPUT_BUCKET/$USER_FOLDER/job-description.pdf
 
 # Wait 30-90 seconds (agent is working!)
 
