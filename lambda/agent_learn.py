@@ -7,11 +7,11 @@ import boto3
 import os
 import time
 from decimal import Decimal
-from agent_utils import publish_event
 
 s3 = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
 sns = boto3.client('sns')
+events = boto3.client('events')
 
 def lambda_handler(event, context):
     """Learn: Store strategy in memory"""

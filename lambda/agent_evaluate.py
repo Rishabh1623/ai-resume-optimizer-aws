@@ -2,8 +2,13 @@
 AGENTIC AI - EVALUATE: Score versions and select best
 Optimized for minimal code size
 """
+import json
+import boto3
+import os
 import re
-from agent_utils import publish_event
+
+events = boto3.client('events')
+EVENT_BUS_NAME = os.environ['EVENT_BUS_NAME']
 
 def lambda_handler(event, context):
     """Evaluate: Agent scores its work"""

@@ -5,9 +5,9 @@ Optimized for minimal code size
 import boto3
 import os
 from decimal import Decimal
-from agent_utils import invoke_bedrock, publish_event
 
 dynamodb = boto3.resource('dynamodb')
+events = boto3.client('events')
 
 def lambda_handler(event, context):
     """Plan: Agent creates strategy"""

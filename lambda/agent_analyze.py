@@ -5,9 +5,9 @@ Optimized for minimal code size
 import json
 import boto3
 import os
-from agent_utils import invoke_bedrock, publish_event, extract_json
 
 comprehend = boto3.client('comprehend')
+events = boto3.client('events')
 
 def lambda_handler(event, context):
     """Perceive: Agent analyzes inputs"""

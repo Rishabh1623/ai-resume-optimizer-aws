@@ -2,7 +2,15 @@
 AGENTIC AI - ACT: Generate optimized versions
 Optimized for minimal code size
 """
-from agent_utils import invoke_bedrock, publish_event
+import json
+import boto3
+import os
+
+bedrock = boto3.client('bedrock-runtime')
+events = boto3.client('events')
+
+BEDROCK_MODEL_ID = os.environ['BEDROCK_MODEL_ID']
+EVENT_BUS_NAME = os.environ['EVENT_BUS_NAME']
 
 def lambda_handler(event, context):
     """Act: Generate optimized version"""
