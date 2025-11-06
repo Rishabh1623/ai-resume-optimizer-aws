@@ -1,0 +1,35 @@
+# ============================================================================
+# TERRAFORM VARIABLES - COPY THIS FILE AND CUSTOMIZE
+# ============================================================================
+# 1. Copy this file: cp terraform.tfvars.example terraform.tfvars
+# 2. Edit terraform.tfvars with your values
+# 3. Run: terraform apply
+
+# ----------------------------------------------------------------------------
+# REQUIRED VARIABLES - YOU MUST CHANGE THESE
+# ----------------------------------------------------------------------------
+
+# Your AWS region (Bedrock available in: us-east-1, us-west-2, eu-west-1)
+aws_region = "us-east-1"  # CHANGE THIS
+
+# Your email address for notifications
+notification_email = "your-email@example.com"  # CHANGE THIS
+
+# ----------------------------------------------------------------------------
+# OPTIONAL VARIABLES - CHANGE IF NEEDED
+# ----------------------------------------------------------------------------
+
+# Project name (used as prefix for all resources)
+project_name = "resume-optimizer"
+
+# Environment (dev, staging, prod)
+environment = "dev"
+
+# Claude model (sonnet is balanced, haiku is faster/cheaper, opus is best quality)
+bedrock_model_id = "anthropic.claude-3-sonnet-20240229-v1:0"
+
+# Lambda timeout in seconds (increase if processing takes longer)
+lambda_timeout = 300
+
+# Lambda memory in MB (more memory = faster but costs more)
+lambda_memory = 512
