@@ -91,9 +91,15 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "output" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "output" {
   bucket = aws_s3_bucket.output.id
+  
   rule {
     id     = "delete-old-files"
     status = "Enabled"
+    
+    filter {
+      prefix = ""
+    }
+    
     expiration {
       days = 30
     }
@@ -396,7 +402,7 @@ resource "aws_iam_role_policy" "step_functions" {
 }
 
 # ============================================================================
-# LAMBDA FUNCTIONS - Agentic AI Components
+# LAMBDA FUNCTIONS - Agentic AI Components   Rishabhmadne
 # ============================================================================
 data "archive_file" "lambda" {
   type        = "zip"
