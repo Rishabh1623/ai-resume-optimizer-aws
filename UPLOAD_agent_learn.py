@@ -28,6 +28,7 @@ def publish_event(detail_type, detail):
     except Exception as e:
         print(f"Event publish error: {e}")
 
+
 def lambda_handler(event, context):
     """Learn: Store strategy in memory"""
     print(f"🧠 LEARN: Storing strategy...")
