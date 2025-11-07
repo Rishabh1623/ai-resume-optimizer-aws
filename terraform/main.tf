@@ -446,6 +446,7 @@ resource "aws_lambda_function" "analyze" {
       BEDROCK_MODEL_ID = var.bedrock_model_id
       JOBS_TABLE       = aws_dynamodb_table.jobs.name
       EVENT_BUS_NAME   = aws_cloudwatch_event_bus.resume_events.name
+      INPUT_BUCKET     = aws_s3_bucket.input.id
     }
   }
 }

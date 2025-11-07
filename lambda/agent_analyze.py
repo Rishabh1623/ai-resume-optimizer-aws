@@ -63,9 +63,68 @@ def publish_event(detail_type, detail):
 def lambda_handler(event, context):
     """Perceive: Agent analyzes inputs"""
     print(f"🤖 PERCEIVE: Analyzing...")
+    print(f"Event received: {json.dumps(event)}")
     
-    resume = event.get('resume', '')
-    job_desc = event.get('jobDescription', '')
+    # Get resume and job description - they might be in different keys
+    resume = event.get('resume', event.get('resumeText', ''))
+    job_desc = event.get('jobDescription', event.get('jobDescriptionText', ''))
+    
+    # If still empty, try to read from S3
+    if not resume and event.get('resume_key'):
+        s3 = boto3.client('s3')
+        textract = boto3.client('textract')
+        bucket = event.get('bucket', os.environ.get('INPUT_BUCKET'))
+        resume_key = event['resume_key']
+        
+        try:
+            # Check if PDF - use Textract
+            if resume_key.lower().endswith('.pdf'):
+                print(f"Extracting PDF with Textract: {resume_key}")
+                response = textract.detect_document_text(
+                    Document={'S3Object': {'Bucket': bucket, 'Name': resume_key}}
+                )
+                resume = '\n'.join([
+                    block['Text'] for block in response.get('Blocks', [])
+                    if block['BlockType'] == 'LINE'
+                ])
+            else:
+                # Text file - read directly
+                response = s3.get_object(Bucket=bucket, Key=resume_key)
+                resume = response['Body'].read().decode('utf-8')
+            
+            print(f"✓ Loaded resume from S3: {len(resume)} chars")
+        except Exception as e:
+            print(f"Error reading resume from S3: {e}")
+    
+    if not job_desc and event.get('job_description_key'):
+        s3 = boto3.client('s3')
+        textract = boto3.client('textract')
+        bucket = event.get('bucket', os.environ.get('INPUT_BUCKET'))
+        jd_key = event['job_description_key']
+        
+        try:
+            # Check if PDF - use Textract
+            if jd_key.lower().endswith('.pdf'):
+                print(f"Extracting PDF with Textract: {jd_key}")
+                response = textract.detect_document_text(
+                    Document={'S3Object': {'Bucket': bucket, 'Name': jd_key}}
+                )
+                job_desc = '\n'.join([
+                    block['Text'] for block in response.get('Blocks', [])
+                    if block['BlockType'] == 'LINE'
+                ])
+            else:
+                # Text file - read directly
+                response = s3.get_object(Bucket=bucket, Key=jd_key)
+                job_desc = response['Body'].read().decode('utf-8')
+            
+            print(f"✓ Loaded job description from S3: {len(job_desc)} chars")
+        except Exception as e:
+            print(f"Error reading job description from S3: {e}")
+    
+    # Validate we have content
+    if not resume or not job_desc:
+        raise ValueError(f"Missing input - resume: {len(resume)} chars, job_desc: {len(job_desc)} chars")
     
     # Extract skills using Bedrock
     skills_prompt = f"Extract skills from resume as JSON array: {resume[:2000]}"
@@ -87,8 +146,14 @@ def lambda_handler(event, context):
                 'management' if any(w in job_lower for w in ['manager', 'director']) else
                 'creative' if any(w in job_lower for w in ['design', 'ux']) else 'general')
     
-    # Sentiment
-    sentiment = comprehend.detect_sentiment(Text=resume[:5000], LanguageCode='en')
+    # Sentiment - only if resume has content
+    sentiment_result = 'NEUTRAL'
+    if resume and len(resume) > 0:
+        try:
+            sentiment = comprehend.detect_sentiment(Text=resume[:5000], LanguageCode='en')
+            sentiment_result = sentiment['Sentiment']
+        except Exception as e:
+            print(f"Sentiment analysis error: {e}")
     
     # Initial score (simple keyword matching)
     keywords = job_lower.split()
@@ -101,9 +166,11 @@ def lambda_handler(event, context):
         'skillsGap': gaps[:15],
         'matchedSkills': matched[:15],
         'jobType': job_type,
-        'sentiment': sentiment['Sentiment'],
+        'sentiment': sentiment_result,
         'originalScore': max(50, score),
-        'targetScore': 85
+        'targetScore': 85,
+        'resume': resume,  # Pass through for next steps
+        'jobDescription': job_desc  # Pass through for next steps
     }
     
     publish_event('AnalysisComplete', {'jobId': event.get('jobId', 'unknown'), 'jobType': job_type})

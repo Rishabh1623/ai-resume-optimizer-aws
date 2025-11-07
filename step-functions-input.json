@@ -1,8 +1,9 @@
 {
-  "user_id": "rishabh-madhav",
-  "resume_key": "Rishabh_R_Madhav.pdf",
-  "job_description_key": "job-description.pdf",
-  "execution_id": "exec-001",
-  "iteration": 1,
-  "max_iterations": 3
+    "user_id": "rishabh-madne",
+    "resume_key": "Rishabh_R_Madne.pdf",
+    "job_description_key": "job-description.pdf",
+    "bucket": "resume-optimizer-dev-input-543927035352",
+    "execution_id": "exec-001",
+    "iteration": 1,
+    "max_iterations": 3
 }
