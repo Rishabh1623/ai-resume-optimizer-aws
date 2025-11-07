@@ -8,7 +8,22 @@ import os
 import re
 
 events = boto3.client('events')
-EVENT_BUS_NAME = os.environ['EVENT_BUS_NAME']
+EVENT_BUS_NAME = os.environ.get('EVENT_BUS_NAME', 'resume-optimizer-events')
+
+
+def publish_event(detail_type, detail):
+    """Publish event to EventBridge"""
+    try:
+        events.put_events(
+            Entries=[{
+                'Source': 'resume.optimizer',
+                'DetailType': detail_type,
+                'Detail': json.dumps(detail),
+                'EventBusName': EVENT_BUS_NAME
+            }]
+        )
+    except Exception as e:
+        print(f"Event publish error: {e}")
 
 def lambda_handler(event, context):
     """Evaluate: Agent scores its work"""

@@ -683,8 +683,8 @@ resource "aws_sfn_state_machine" "agentic_workflow" {
           "plan.$"           = "$.plan"
           "evaluation.$"     = "$.evaluation"
           "jobId.$"          = "$.jobId"
-          "resume.$"         = "$.resume"
-          "jobDescription.$" = "$.jobDescription"
+          "resume.$"         = "$.analysis.resume"
+          "jobDescription.$" = "$.analysis.jobDescription"
         }
         Next = "GenerateVersions"
       }

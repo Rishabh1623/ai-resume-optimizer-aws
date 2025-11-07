@@ -13,6 +13,21 @@ dynamodb = boto3.resource('dynamodb')
 sns = boto3.client('sns')
 events = boto3.client('events')
 
+
+def publish_event(detail_type, detail):
+    """Publish event to EventBridge"""
+    try:
+        events.put_events(
+            Entries=[{
+                'Source': 'resume.optimizer',
+                'DetailType': detail_type,
+                'Detail': json.dumps(detail),
+                'EventBusName': os.environ.get('EVENT_BUS_NAME', 'resume-optimizer-events')
+            }]
+        )
+    except Exception as e:
+        print(f"Event publish error: {e}")
+
 def lambda_handler(event, context):
     """Learn: Store strategy in memory"""
     print(f"🧠 LEARN: Storing strategy...")
