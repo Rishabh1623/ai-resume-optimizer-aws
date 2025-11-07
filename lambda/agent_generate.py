@@ -6,11 +6,46 @@ import json
 import boto3
 import os
 
-bedrock = boto3.client('bedrock-runtime')
+bedrock = boto3.client('bedrock-runtime', region_name=os.environ.get('AWS_REGION', 'us-east-1'))
 events = boto3.client('events')
 
-BEDROCK_MODEL_ID = os.environ['BEDROCK_MODEL_ID']
-EVENT_BUS_NAME = os.environ['EVENT_BUS_NAME']
+BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', 'anthropic.claude-3-haiku-20240307-v1:0')
+EVENT_BUS_NAME = os.environ.get('EVENT_BUS_NAME', 'resume-optimizer-events')
+
+
+def invoke_bedrock(prompt, max_tokens=500, temperature=0.7):
+    """Invoke Bedrock Claude model"""
+    try:
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+            "messages": [{"role": "user", "content": prompt}]
+        })
+        response = bedrock.invoke_model(
+            modelId=BEDROCK_MODEL_ID,
+            body=body
+        )
+        result = json.loads(response['body'].read())
+        return result['content'][0]['text']
+    except Exception as e:
+        print(f"Bedrock error: {e}")
+        return None
+
+
+def publish_event(detail_type, detail):
+    """Publish event to EventBridge"""
+    try:
+        events.put_events(
+            Entries=[{
+                'Source': 'resume.optimizer',
+                'DetailType': detail_type,
+                'Detail': json.dumps(detail),
+                'EventBusName': EVENT_BUS_NAME
+            }]
+        )
+    except Exception as e:
+        print(f"Event publish error: {e}")
 
 def lambda_handler(event, context):
     """Act: Generate optimized version"""

@@ -1,7 +1,7 @@
 {
     "user_id": "rishabh-madne",
-    "resume_key": "Rishabh_R_Madne.pdf",
-    "job_description_key": "job-description.pdf",
+    "resume_key": "resumes/Rishabh_R_Madne.pdf",
+    "job_description_key": "resumes/job description.pdf",
     "bucket": "resume-optimizer-dev-input-543927035352",
     "execution_id": "exec-001",
     "iteration": 1,

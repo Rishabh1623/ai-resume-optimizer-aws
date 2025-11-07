@@ -76,7 +76,15 @@ def lambda_handler(event, context):
         bucket = event.get('bucket', os.environ.get('INPUT_BUCKET'))
         resume_key = event['resume_key']
         
+        print(f"DEBUG: Attempting to read from S3")
+        print(f"DEBUG: Bucket = {bucket}")
+        print(f"DEBUG: Key = {resume_key}")
+        
         try:
+            # First check if file exists
+            s3.head_object(Bucket=bucket, Key=resume_key)
+            print(f"✓ File exists in S3")
+            
             # Check if PDF - use Textract
             if resume_key.lower().endswith('.pdf'):
                 print(f"Extracting PDF with Textract: {resume_key}")
@@ -94,7 +102,9 @@ def lambda_handler(event, context):
             
             print(f"✓ Loaded resume from S3: {len(resume)} chars")
         except Exception as e:
-            print(f"Error reading resume from S3: {e}")
+            print(f"❌ Error reading resume from S3: {e}")
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")
     
     if not job_desc and event.get('job_description_key'):
         s3 = boto3.client('s3')
@@ -102,7 +112,15 @@ def lambda_handler(event, context):
         bucket = event.get('bucket', os.environ.get('INPUT_BUCKET'))
         jd_key = event['job_description_key']
         
+        print(f"DEBUG: Attempting to read JD from S3")
+        print(f"DEBUG: Bucket = {bucket}")
+        print(f"DEBUG: Key = {jd_key}")
+        
         try:
+            # First check if file exists
+            s3.head_object(Bucket=bucket, Key=jd_key)
+            print(f"✓ File exists in S3")
+            
             # Check if PDF - use Textract
             if jd_key.lower().endswith('.pdf'):
                 print(f"Extracting PDF with Textract: {jd_key}")
@@ -120,11 +138,18 @@ def lambda_handler(event, context):
             
             print(f"✓ Loaded job description from S3: {len(job_desc)} chars")
         except Exception as e:
-            print(f"Error reading job description from S3: {e}")
+            print(f"❌ Error reading job description from S3: {e}")
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")
     
     # Validate we have content
-    if not resume or not job_desc:
-        raise ValueError(f"Missing input - resume: {len(resume)} chars, job_desc: {len(job_desc)} chars")
+    if not resume:
+        raise ValueError(f"Missing resume - resume: {len(resume)} chars")
+    
+    # If no job description, use generic one
+    if not job_desc:
+        print("⚠️ No job description found, using generic optimization")
+        job_desc = "Professional role requiring strong technical skills, communication abilities, and relevant experience. Seeking candidates with proven track record and ability to work in team environments."
     
     # Extract skills using Bedrock
     skills_prompt = f"Extract skills from resume as JSON array: {resume[:2000]}"
