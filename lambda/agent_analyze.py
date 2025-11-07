@@ -5,9 +5,60 @@ Optimized for minimal code size
 import json
 import boto3
 import os
+import re
 
 comprehend = boto3.client('comprehend')
 events = boto3.client('events')
+bedrock = boto3.client('bedrock-runtime', region_name=os.environ.get('AWS_REGION', 'us-east-1'))
+
+def invoke_bedrock(prompt, max_tokens=500):
+    """Invoke Bedrock Claude model"""
+    try:
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": max_tokens,
+            "messages": [{"role": "user", "content": prompt}]
+        })
+        response = bedrock.invoke_model(
+            modelId='anthropic.claude-3-haiku-20240307-v1:0',
+            body=body
+        )
+        result = json.loads(response['body'].read())
+        return result['content'][0]['text']
+    except Exception as e:
+        print(f"Bedrock error: {e}")
+        return None
+
+def extract_json(text):
+    """Extract JSON array from text"""
+    if not text:
+        return []
+    try:
+        # Try direct parse
+        return json.loads(text)
+    except:
+        # Extract JSON array from text
+        match = re.search(r'\[.*\]', text, re.DOTALL)
+        if match:
+            try:
+                return json.loads(match.group())
+            except:
+                pass
+        return []
+
+def publish_event(detail_type, detail):
+    """Publish event to EventBridge"""
+    try:
+        events.put_events(
+            Entries=[{
+                'Source': 'resume.optimizer',
+                'DetailType': detail_type,
+                'Detail': json.dumps(detail),
+                'EventBusName': os.environ.get('EVENT_BUS_NAME', 'resume-optimizer-events')
+            }]
+        )
+    except Exception as e:
+        print(f"Event publish error: {e}")
 
 def lambda_handler(event, context):
     """Perceive: Agent analyzes inputs"""
@@ -55,7 +106,7 @@ def lambda_handler(event, context):
         'targetScore': 85
     }
     
-    publish_event('AnalysisComplete', {'jobId': event.get('jobId'), 'jobType': job_type})
+    publish_event('AnalysisComplete', {'jobId': event.get('jobId', 'unknown'), 'jobType': job_type})
     
     print(f"✓ {len(gaps)} gaps, {len(matched)} matched, type: {job_type}")
     return analysis
