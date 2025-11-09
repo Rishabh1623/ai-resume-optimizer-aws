@@ -1,0 +1,33 @@
+Title - AWS Cloud Architect (Capgemini)
+Location - New York City, NY
+
+Job Description
+
+We are seeking a highly experienced and technically proficient Senior Consultant to support and lead the development, deployment, and optimization of marketing applications hosted on AWS cloud infrastructure. This role involves strategic planning, secure cloud architecture design, and collaboration with internal teams, clients, and third-party solution partners to deliver scalable and secure digital marketing solutions.
+
+Key Responsibilities:
+• Support a wide range of marketing applications including consumer-facing websites, microsites, CRM systems, email marketing programs, and performance advertising campaigns.
+• Collaborate with Capgemini teams, clients, and third-party partners to implement secure, scalable, and industry-compliant marketing solutions.
+• Lead strategic cloud planning, governance, and implementation using AWS Landing Zone, AWS Control Tower, and cloud security frameworks.
+• Design and optimize multi-account AWS environments with a strong focus on security, compliance, and disaster recovery.
+• Align infrastructure usage patterns with application architecture and business needs.
+• Develop and maintain infrastructure automation using CI/CD pipelines and Infrastructure as Code (IaC) tools like Terraform and CloudFormation.
+• Conduct code reviews, troubleshoot issues, and perform data analysis and reporting.
+• Drive innovation and continuous improvement across cloud and application services.
+
+Required Qualifications:
+• 10+ years of experience in designing and developing digital marketing applications hosted on-premise and in cloud environments.
+• 8+ years of hands-on experience with AWS cloud infrastructure.
+• Proven experience in on-prem to AWS migration strategy and execution.
+• Expertise in AEM (Adobe Experience Manager) applications running on AWS.
+• Bachelor's or Master's degree in Computer Science or related field.
+• AWS Certified Solutions Architect – Professional (Security Specialty certification is a plus).
+
+Technical Expertise:
+• Cloud Architecture: AWS Landing Zone, AWS Control Tower, Cloud Security Frameworks.
+• Security & Compliance: IAM, network security, cloud compliance standards.
+• Infrastructure as Code: Terraform, CloudFormation.
+• Serverless Computing: AWS Fargate, AWS Batch, Lambda functions.
+• CI/CD & Automation: Jenkins pipelines, deployment automation.
+• Networking & Monitoring: Cloud identity management, advanced networking, monitoring tools.
+• MarTech Platforms: Understanding of enterprise-grade marketing technologies and their integration.

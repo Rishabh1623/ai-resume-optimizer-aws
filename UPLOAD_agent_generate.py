@@ -47,6 +47,7 @@ def publish_event(detail_type, detail):
     except Exception as e:
         print(f"Event publish error: {e}")
 
+
 def lambda_handler(event, context):
     """Act: Generate optimized version"""
     approach = event.get('approach', 'keywords')
@@ -58,66 +59,18 @@ def lambda_handler(event, context):
     
     print(f"🎨 ACT: Generating {approach} version (iter {iteration})...")
     
-    # Build prompt based on approach - CRITICAL: Must preserve original content
-    if approach == 'keywords':
-        prompt = f"""Optimize this resume by incorporating relevant keywords from the job description while keeping ALL original content, experience, and achievements.
-
-JOB DESCRIPTION:
-{job_desc[:1500]}
-
-ORIGINAL RESUME:
-{resume[:3000]}
-
-INSTRUCTIONS:
-- Keep ALL original work experience, projects, and achievements
-- Add relevant keywords from job description naturally
-- Maintain the candidate's actual name, contact info, and details
-- Improve ATS compatibility
-- Use action verbs
-- Keep professional tone
-
-Return ONLY the optimized resume with the candidate's actual information."""
+    # Build prompt based on approach
+    prompts = {
+        'keywords': f"Optimize resume with job keywords. Job: {job_desc[:1500]} Resume: {resume[:2000]}",
+        'achievements': f"Add quantified achievements. Job: {job_desc[:1500]} Resume: {resume[:2000]}",
+        'structure': f"Improve structure and formatting. Job: {job_desc[:1500]} Resume: {resume[:2000]}"
+    }
     
-    elif approach == 'achievements':
-        prompt = f"""Enhance this resume by making achievements more quantifiable and impactful while keeping ALL original content.
-
-JOB DESCRIPTION:
-{job_desc[:1500]}
-
-ORIGINAL RESUME:
-{resume[:3000]}
-
-INSTRUCTIONS:
-- Keep ALL original work experience and projects
-- Enhance existing achievements with stronger action verbs
-- Maintain all actual metrics and numbers
-- Add impact statements where appropriate
-- Keep the candidate's actual name and details
-- Align with job requirements
-
-Return ONLY the enhanced resume with the candidate's actual information."""
-    
-    else:  # structure
-        prompt = f"""Improve the structure and formatting of this resume while keeping ALL original content intact.
-
-JOB DESCRIPTION:
-{job_desc[:1500]}
-
-ORIGINAL RESUME:
-{resume[:3000]}
-
-INSTRUCTIONS:
-- Keep ALL original content, experience, and achievements
-- Improve section organization and formatting
-- Maintain the candidate's actual name, contact, and details
-- Enhance readability and ATS compatibility
-- Use clear section headers
-- Keep professional formatting
-
-Return ONLY the restructured resume with the candidate's actual information."""
+    base_prompt = prompts.get(approach, prompts['keywords'])
+    prompt = f"{base_prompt}\n\nInstructions:\n- ATS-friendly\n- Professional tone\n- Clear sections\n- Action verbs\n- Metrics\n\nReturn ONLY optimized resume."
     
     if iteration > 1:
-        prompt += f"\n\nIteration {iteration}: Further refine based on previous optimization."
+        prompt += f"\n\nIteration {iteration}: Improve previous attempt."
     
     optimized = invoke_bedrock(prompt, 4096, 0.7) or resume
     

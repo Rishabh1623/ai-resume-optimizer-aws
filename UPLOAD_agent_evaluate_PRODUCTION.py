@@ -1,6 +1,6 @@
 """
 AGENTIC AI - EVALUATE: Score versions and select best
-Optimized for minimal code size
+PRODUCTION-READY VERSION with realistic scoring
 """
 import json
 import boto3
@@ -24,6 +24,7 @@ def publish_event(detail_type, detail):
         )
     except Exception as e:
         print(f"Event publish error: {e}")
+
 
 def lambda_handler(event, context):
     """Evaluate: Agent scores its work"""
@@ -108,7 +109,7 @@ def lambda_handler(event, context):
             'score': {
                 'overall': round(overall, 2),
                 'ats': ats,
-                'keywords': keyword_match,
+                'keywords': round(keyword_match, 3),
                 'actionVerbs': action_count,
                 'achievements': metrics
             }

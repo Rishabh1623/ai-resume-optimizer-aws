@@ -1,0 +1,56 @@
+Senior Cloud Solutions Architect - AWS
+Location: New York, NY (Hybrid)
+Salary: $140,000 - $180,000
+
+About the Role:
+We are seeking an experienced Senior Cloud Solutions Architect to design and implement enterprise-scale AWS infrastructure for our financial services clients. You will lead cloud migration initiatives, architect serverless solutions, and establish DevOps best practices.
+
+Key Responsibilities:
+• Design and implement highly available, fault-tolerant AWS architectures using EC2, EKS, Lambda, RDS, and DynamoDB
+• Lead cloud migration projects from on-premises to AWS, ensuring zero downtime
+• Develop Infrastructure as Code using Terraform and CloudFormation
+• Implement CI/CD pipelines using Jenkins, GitHub Actions, and AWS CodePipeline
+• Design and optimize serverless architectures using Lambda, API Gateway, and Step Functions
+• Establish security best practices including IAM policies, VPC design, GuardDuty, and Secrets Manager
+• Implement monitoring and observability using CloudWatch, X-Ray, and CloudTrail
+• Optimize cloud costs using Cost Explorer, Trusted Advisor, and FinOps practices
+• Mentor junior engineers and conduct architecture reviews
+• Collaborate with cross-functional teams including developers, security, and operations
+
+Required Qualifications:
+• 5+ years of hands-on AWS experience
+• AWS Solutions Architect Associate or Professional certification
+• Strong experience with Kubernetes (EKS) and container orchestration
+• Proficiency in Python, Bash scripting, and YAML
+• Deep understanding of networking concepts (VPC, subnets, route tables, security groups)
+• Experience with serverless architectures and event-driven design
+• Proven track record of successful cloud migrations
+• Strong communication skills and ability to present to stakeholders
+• Experience with Agile methodologies and DevOps practices
+
+Preferred Qualifications:
+• Master's degree in Computer Science or related field
+• Experience with AWS Glue, Athena, and data analytics
+• Knowledge of compliance frameworks (SOC2, HIPAA, PCI-DSS)
+• Experience in fintech, healthcare, or retail industries
+• Contributions to open-source projects
+• Experience with multi-cloud environments (Azure, GCP)
+
+Technical Skills:
+• Cloud Platforms: AWS (EC2, EKS, Lambda, RDS/Aurora, S3, DynamoDB, CloudFront, Route 53, EventBridge, Step Functions)
+• Infrastructure as Code: Terraform, CloudFormation, CDK
+• Containers & Orchestration: Docker, Kubernetes, EKS, ECS
+• CI/CD: Jenkins, GitHub Actions, GitLab CI, AWS CodePipeline
+• Programming: Python, Bash, Go, Node.js
+• Databases: Aurora, RDS, DynamoDB, ElastiCache
+• Monitoring: CloudWatch, X-Ray, Prometheus, Grafana
+• Security: IAM, GuardDuty, Security Hub, Secrets Manager, KMS
+• Networking: VPC, Transit Gateway, Direct Connect, Route 53
+
+What We Offer:
+• Competitive salary and equity
+• Comprehensive health benefits
+• 401(k) matching
+• Professional development budget
+• Flexible work arrangements
+• Collaborative team environment

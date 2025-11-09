@@ -1,474 +1,321 @@
-# 🏗️ AI Resume Optimizer - Solution Architecture
+# AI Resume Optimizer - Architecture Diagram
 
-## 📊 High-Level Architecture Diagram
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                           AI RESUME OPTIMIZER - AGENTIC AI SYSTEM                        │
-│                                    AWS CLOUD ARCHITECTURE                                │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────────────────────────────────┐
-│     USER        │    │   API GATEWAY   │    │              AGENTIC AI WORKFLOW            │
-│                 │    │                 │    │                                             │
-│  📱 Web App     │◄──►│  REST API       │◄──►│         STEP FUNCTIONS STATE MACHINE       │
-│  📧 Email       │    │  /health        │    │                                             │
-│  🌐 S3 Console  │    │  /optimize      │    │  ┌─────────────────────────────────────────┐ │
-└─────────────────┘    └─────────────────┘    │  │          AGENTIC AI LOOP                │ │
-                                              │  │                                         │ │
-┌─────────────────────────────────────────────┐ │  │  1. PERCEIVE (Analyze)                  │ │
-│            INPUT LAYER                      │ │  │     ├─ Resume Analysis                 │ │
-│                                             │ │  │     ├─ Job Description Analysis        │ │
-│  ┌─────────────┐    ┌─────────────────────┐ │ │  │     └─ Skill Gap Identification        │ │
-│  │ S3 INPUT    │    │    EVENTBRIDGE      │ │ │  │                                         │ │
-│  │ BUCKET      │───►│   CUSTOM BUS        │─┼─┼─►│  2. PLAN (Strategy)                     │ │
-│  │             │    │                     │ │ │  │     ├─ Query Agent Memory              │ │
-│  │ resume.pdf  │    │ Event Rules:        │ │ │  │     ├─ Choose Optimization Strategy    │ │
-│  │ job-desc.txt│    │ • S3 Object Created │ │ │  │     └─ Set Target ATS Score (85+)      │ │
-│  └─────────────┘    │ • Analysis Complete │ │ │  │                                         │ │
-                       │ • Version Generated │ │ │  │  3. ACT (Generate)                      │ │
-                       └─────────────────────┘ │ │  │     ├─ Generate 3 Versions (Parallel)  │ │
-                                              │ │  │     ├─ Keywords Version                 │ │
-┌─────────────────────────────────────────────┐ │ │  │     ├─ Achievement Version             │ │
-│           PROCESSING LAYER                  │ │ │  │     └─ Structure Version               │ │
-│                                             │ │ │  │                                         │ │
-│  ┌─────────────┐    ┌─────────────────────┐ │ │  │  4. EVALUATE (Score)                    │ │
-│  │ LAMBDA      │    │       SQS           │ │ │  │     ├─ ATS Compatibility Score          │ │
-│  │ S3-TRIGGER  │───►│   PROCESSING        │─┼─┼─►│     ├─ Keyword Density Analysis         │ │
-│  │             │    │     QUEUE           │ │ │  │     └─ Select Best Version              │ │
-│  │ • Find JD   │    │                     │ │ │  │                                         │ │
-│  │ • Trigger   │    │ ┌─────────────────┐ │ │ │  │  5. DECIDE (Quality Check)              │ │
-│  │   Workflow  │    │ │   DLQ (Errors)  │ │ │ │  │     ├─ Score >= 85? ✓ Complete         │ │
-│  └─────────────┘    │ └─────────────────┘ │ │ │  │     ├─ Score < 85? ✗ Iterate           │ │
-                       └─────────────────────┘ │ │  │     └─ Max 3 Iterations                │ │
-                                              │ │  │                                         │ │
-┌─────────────────────────────────────────────┐ │ │  │  6. LEARN (Memory)                      │ │
-│            AI SERVICES                      │ │ │  │     ├─ Store Successful Strategy       │ │
-│                                             │ │ │  │     ├─ Update Agent Memory             │ │
-│  ┌─────────────┐  ┌─────────────┐  ┌──────┐ │ │  │     └─ Improve Future Performance      │ │
-│  │   BEDROCK   │  │  TEXTRACT   │  │COMPRE│ │ │  └─────────────────────────────────────────┘ │
-│  │             │  │             │  │HEND  │ │ └─────────────────────────────────────────────┘
-│  │ Claude 3    │  │ PDF Extract │  │      │ │
-│  │ Sonnet      │  │ Text OCR    │  │NLP   │ │
-│  │             │  │             │  │      │ │
-│  │ • Analysis  │  │ • Resume    │  │•Sent │ │
-│  │ • Planning  │  │   Parsing   │  │iment │ │
-│  │ • Generate  │  │ • Job Desc  │  │•Key  │ │
-│  │ • Evaluate  │  │   Extract   │  │words │ │
-│  └─────────────┘  └─────────────┘  └──────┘ │
-└─────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────┐
-│            AGENT COMPONENTS                 │
-│                                             │
-│  ┌─────────────┐  ┌─────────────┐  ┌──────┐ │
-│  │   ANALYZE   │  │    PLAN     │  │GENER │ │
-│  │   LAMBDA    │  │   LAMBDA    │  │ATE   │ │
-│  │             │  │             │  │LAMBDA│ │
-│  │ • Parse PDF │  │ • Query Mem │  │      │ │
-│  │ • Extract   │  │ • Choose    │  │•Ver1 │ │
-│  │   Skills    │  │   Strategy  │  │•Ver2 │ │
-│  │ • Find Gaps │  │ • Set Goals │  │•Ver3 │ │
-│  └─────────────┘  └─────────────┘  └──────┘ │
-│                                             │
-│  ┌─────────────┐  ┌─────────────┐           │
-│  │  EVALUATE   │  │    LEARN    │           │
-│  │   LAMBDA    │  │   LAMBDA    │           │
-│  │             │  │             │           │
-│  │ • Score ATS │  │ • Store     │           │
-│  │ • Rank Ver  │  │   Strategy  │           │
-│  │ • Quality   │  │ • Update    │           │
-│  │   Check     │  │   Memory    │           │
-│  └─────────────┘  └─────────────┘           │
-└─────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────┐
-│            DATA LAYER                       │
-│                                             │
-│  ┌─────────────┐  ┌─────────────┐  ┌──────┐ │
-│  │ DYNAMODB    │  │ DYNAMODB    │  │DYNAMO│ │
-│  │ JOBS TABLE  │  │AGENT MEMORY │  │DB    │ │
-│  │             │  │   TABLE     │  │ANALY │ │
-│  │ • Job ID    │  │             │  │TICS  │ │
-│  │ • Status    │  │ • Job Type  │  │      │ │
-│  │ • Progress  │  │ • Strategy  │  │•Metr │ │
-│  │ • Results   │  │ • Success   │  │ics   │ │
-│  │             │  │   Score     │  │•Stats│ │
-│  │ GSI: Status │  │ • Timestamp │  │•Trend│ │
-│  └─────────────┘  └─────────────┘  └──────┘ │
-└─────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────┐
-│            OUTPUT LAYER                     │
-│                                             │
-│  ┌─────────────┐    ┌─────────────────────┐ │
-│  │ S3 OUTPUT   │    │        SNS          │ │
-│  │ BUCKET      │    │    NOTIFICATIONS    │ │
-│  │             │    │                     │ │
-│  │ optimized/  │    │ • Email Reports     │ │
-│  │ ├─resume1   │    │ • Success/Failure   │ │
-│  │ ├─resume2   │    │ • Score Improvement │ │
-│  │ └─resume3   │    │ • Agent Insights    │ │
-│  └─────────────┘    └─────────────────────┘ │
-└─────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────┐
-│          MONITORING & SECURITY              │
-│                                             │
-│  ┌─────────────┐  ┌─────────────┐  ┌──────┐ │
-│  │ CLOUDWATCH  │  │     IAM     │  │X-RAY │ │
-│  │             │  │             │  │      │ │
-│  │ • Logs      │  │ • Roles     │  │•Trace│ │
-│  │ • Metrics   │  │ • Policies  │  │•Debug│ │
-│  │ • Alarms    │  │ • Least     │  │•Perf │ │
-│  │ • Dashboard │  │   Privilege │  │      │ │
-│  └─────────────┘  └─────────────┘  └──────┘ │
-└─────────────────────────────────────────────┘
-```
-
-## 🔄 Event-Driven Flow Diagram
+## High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                              EVENT-DRIVEN ARCHITECTURE FLOW                              │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         AI RESUME OPTIMIZER SYSTEM                          │
+│                    Event-Driven Agentic AI Architecture                     │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-USER UPLOADS RESUME
-        │
-        ▼
-┌─────────────────┐
-│   S3 BUCKET     │ ──────► S3:ObjectCreated Event
-│   (Input)       │
-└─────────────────┘
-        │
-        ▼
-┌─────────────────┐
-│  EVENTBRIDGE    │ ──────► Custom Event Bus
-│  CUSTOM BUS     │         resume-optimizer-events
-└─────────────────┘
-        │
-        ▼
-┌─────────────────┐
-│ EVENTBRIDGE     │ ──────► Triggers Step Functions
-│    RULE         │         Pattern: {"source": ["s3.amazonaws.com"]}
-└─────────────────┘
-        │
-        ▼
-┌─────────────────┐
-│ STEP FUNCTIONS  │ ──────► Agentic AI Workflow Starts
-│ STATE MACHINE   │         resume-optimizer-agentic-workflow
-└─────────────────┘
-        │
-        ▼
-┌─────────────────┐
-│    ANALYZE      │ ──────► AnalysisComplete Event
-│    LAMBDA       │         {"jobId": "123", "skillGaps": 12}
-└─────────────────┘
-        │
-        ▼
-┌─────────────────┐
-│     PLAN        │ ──────► PlanCreated Event
-│    LAMBDA       │         {"strategy": "keyword_optimization"}
-└─────────────────┘
-        │
-        ▼
-┌─────────────────┐
-│   GENERATE      │ ──────► VersionGenerated Event (x3)
-│    LAMBDA       │         {"version": "keywords", "score": 78}
-└─────────────────┘
-        │
-        ▼
-┌─────────────────┐
-│   EVALUATE      │ ──────► EvaluationComplete Event
-│    LAMBDA       │         {"bestScore": 82, "threshold": 85}
-└─────────────────┘
-        │
-        ▼
-┌─────────────────┐         ┌─────────────────┐
-│  QUALITY CHECK  │ ──Yes──►│     LEARN       │ ──────► JobComplete Event
-│  (Score >= 85?) │         │    LAMBDA       │         {"finalScore": 88}
-└─────────────────┘         └─────────────────┘
-        │ No                          │
-        ▼                             ▼
-┌─────────────────┐         ┌─────────────────┐
-│   ITERATE       │         │   S3 OUTPUT     │ ──────► ResultsAvailable Event
-│ (Max 3 times)   │         │    BUCKET       │         {"location": "s3://..."}
-└─────────────────┘         └─────────────────┘
-        │                             │
-        └─────────────────────────────┼─────────────────────────────
-                                      ▼
-                              ┌─────────────────┐
-                              │      SNS        │ ──────► Email Notification
-                              │  NOTIFICATION   │         "Resume optimized!"
-                              └─────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  USER INTERACTION LAYER                                                      │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  👤 User                                                                     │
+│    │                                                                         │
+│    ├─► Upload Resume (PDF/TXT) ──────────────┐                             │
+│    └─► Upload Job Description (PDF/TXT) ─────┤                             │
+│                                               │                             │
+│                                               ▼                             │
+│                                    ┌──────────────────┐                     │
+│                                    │   Amazon S3      │                     │
+│                                    │  Input Bucket    │                     │
+│                                    │                  │                     │
+│                                    │ • resumes/       │                     │
+│                                    │ • job-desc/      │                     │
+│                                    └────────┬─────────┘                     │
+│                                             │                               │
+│                                             │ S3 Event                      │
+│                                             │ Notification                  │
+└─────────────────────────────────────────────┼───────────────────────────────┘
+                                              │
+                                              ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  INGESTION & TRIGGER LAYER                                                   │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│                              ┌─────────────────┐                            │
+│                              │  Lambda         │                            │
+│                              │  S3 Trigger     │                            │
+│                              │                 │                            │
+│                              │ • Detect upload │                            │
+│                              │ • Find matching │                            │
+│                              │   job desc      │                            │
+│                              └────────┬────────┘                            │
+│                                       │                                     │
+│                                       │ Invoke                              │
+│                                       ▼                                     │
+│                              ┌─────────────────┐                            │
+│                              │  AWS Textract   │                            │
+│                              │                 │                            │
+│                              │ • Extract text  │                            │
+│                              │   from PDFs     │                            │
+│                              └────────┬────────┘                            │
+│                                       │                                     │
+│                                       │ Start Execution                     │
+└───────────────────────────────────────┼─────────────────────────────────────┘
+                                        │
+                                        ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  AGENTIC AI ORCHESTRATION LAYER (Step Functions)                            │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │                    AWS STEP FUNCTIONS                              │    │
+│  │              Agentic AI Workflow State Machine                     │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────┐      │
+│  │  PHASE 1: PERCEIVE (Analyze)                                     │      │
+│  │  ┌────────────────────────────────────────────────────┐          │      │
+│  │  │  Lambda: agent_analyze                             │          │      │
+│  │  │  ┌──────────────────────────────────────────────┐  │          │      │
+│  │  │  │ • Extract skills from resume                 │  │          │      │
+│  │  │  │ • Extract requirements from job desc         │  │          │      │
+│  │  │  │ • Calculate skills gap                       │  │          │      │
+│  │  │  │ • Classify job type                          │  │          │      │
+│  │  │  │ • Sentiment analysis                         │  │          │      │
+│  │  │  │ • Calculate initial score                    │  │          │      │
+│  │  │  └──────────────────────────────────────────────┘  │          │      │
+│  │  │                                                     │          │      │
+│  │  │  Uses: AWS Bedrock (Claude 3), Comprehend          │          │      │
+│  │  └────────────────────────────────────────────────────┘          │      │
+│  └──────────────────────────┬───────────────────────────────────────┘      │
+│                             │                                               │
+│                             ▼                                               │
+│  ┌──────────────────────────────────────────────────────────────────┐      │
+│  │  PHASE 2: PLAN (Strategy)                                        │      │
+│  │  ┌────────────────────────────────────────────────────┐          │      │
+│  │  │  Lambda: agent_plan                                │          │      │
+│  │  │  ┌──────────────────────────────────────────────┐  │          │      │
+│  │  │  │ • Query agent memory for past successes     │  │          │      │
+│  │  │  │ • AI decides optimization strategy          │  │          │      │
+│  │  │  │ • Create optimization plan                  │  │          │      │
+│  │  │  │   - keyword_optimization                    │  │          │      │
+│  │  │  │   - achievement_focus                       │  │          │      │
+│  │  │  │   - skills_emphasis                         │  │          │      │
+│  │  │  │   - balanced_approach                       │  │          │      │
+│  │  │  └──────────────────────────────────────────────┘  │          │      │
+│  │  │                                                     │          │      │
+│  │  │  Uses: DynamoDB (Agent Memory), AWS Bedrock         │          │      │
+│  │  └────────────────────────────────────────────────────┘          │      │
+│  └──────────────────────────┬───────────────────────────────────────┘      │
+│                             │                                               │
+│                             ▼                                               │
+│  ┌──────────────────────────────────────────────────────────────────┐      │
+│  │  PHASE 3: ACT (Generate) - PARALLEL EXECUTION                    │      │
+│  │  ┌────────────────────────────────────────────────────┐          │      │
+│  │  │  Lambda: agent_generate (3 parallel branches)      │          │      │
+│  │  │  ┌──────────────────────────────────────────────┐  │          │      │
+│  │  │  │ Branch 1: Keywords Optimization              │  │          │      │
+│  │  │  │ Branch 2: Achievements Enhancement           │  │          │      │
+│  │  │  │ Branch 3: Structure Improvement              │  │          │      │
+│  │  │  │                                              │  │          │      │
+│  │  │  │ Each generates optimized resume version      │  │          │      │
+│  │  │  └──────────────────────────────────────────────┘  │          │      │
+│  │  │                                                     │          │      │
+│  │  │  Uses: AWS Bedrock (Claude 3)                       │          │      │
+│  │  └────────────────────────────────────────────────────┘          │      │
+│  └──────────────────────────┬───────────────────────────────────────┘      │
+│                             │                                               │
+│                             ▼                                               │
+│  ┌──────────────────────────────────────────────────────────────────┐      │
+│  │  PHASE 4: EVALUATE (Score & Select)                              │      │
+│  │  ┌────────────────────────────────────────────────────┐          │      │
+│  │  │  Lambda: agent_evaluate                            │          │      │
+│  │  │  ┌──────────────────────────────────────────────┐  │          │      │
+│  │  │  │ • Score each version:                        │  │          │      │
+│  │  │  │   - ATS score (keyword matching)             │  │          │      │
+│  │  │  │   - Action verbs count                       │  │          │      │
+│  │  │  │   - Quantified achievements                  │  │          │      │
+│  │  │  │   - Overall quality score                    │  │          │      │
+│  │  │  │ • Select best version                        │  │          │      │
+│  │  │  │ • Check if score >= 85%                      │  │          │      │
+│  │  │  └──────────────────────────────────────────────┘  │          │      │
+│  │  └────────────────────────────────────────────────────┘          │      │
+│  └──────────────────────────┬───────────────────────────────────────┘      │
+│                             │                                               │
+│                             ▼                                               │
+│                    ┌─────────────────┐                                     │
+│                    │  Decision Point │                                     │
+│                    │                 │                                     │
+│                    │ Score >= 85%?   │                                     │
+│                    │ OR              │                                     │
+│                    │ Iteration >= 3? │                                     │
+│                    └────┬───────┬────┘                                     │
+│                         │       │                                          │
+│                    NO   │       │  YES                                     │
+│                         │       │                                          │
+│         ┌───────────────┘       └──────────────┐                          │
+│         │                                       │                          │
+│         ▼                                       ▼                          │
+│  ┌─────────────────┐                  ┌──────────────────────────┐        │
+│  │ Increment       │                  │  PHASE 5: LEARN          │        │
+│  │ Iteration       │                  │  ┌────────────────────┐  │        │
+│  │ Loop Back       │                  │  │ Lambda: agent_learn│  │        │
+│  └────────┬────────┘                  │  │                    │  │        │
+│           │                            │  │ • Store strategy   │  │        │
+│           │                            │  │   in memory        │  │        │
+│           └──────► PHASE 3 (ACT)       │  │ • Save to S3       │  │        │
+│                                        │  │ • Update DynamoDB  │  │        │
+│                                        │  │ • Send SNS alert   │  │        │
+│                                        │  └────────────────────┘  │        │
+│                                        └──────────────────────────┘        │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  EVENT-DRIVEN COMMUNICATION LAYER                                            │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│                      ┌────────────────────────────┐                         │
+│                      │  Amazon EventBridge        │                         │
+│                      │  Custom Event Bus          │                         │
+│                      │                            │                         │
+│                      │  Events Published:         │                         │
+│                      │  • AnalysisComplete        │                         │
+│                      │  • PlanCreated             │                         │
+│                      │  • VersionGenerated        │                         │
+│                      │  • EvaluationComplete      │                         │
+│                      │  • OptimizationComplete    │                         │
+│                      └────────────────────────────┘                         │
+│                                                                              │
+│                      ┌────────────────────────────┐                         │
+│                      │  Amazon SQS                │                         │
+│                      │                            │                         │
+│                      │  • Processing Queue        │                         │
+│                      │  • Dead Letter Queue (DLQ) │                         │
+│                      └────────────────────────────┘                         │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  DATA & STORAGE LAYER                                                        │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─────────────────────┐  ┌─────────────────────┐  ┌──────────────────┐   │
+│  │  Amazon DynamoDB    │  │  Amazon DynamoDB    │  │  Amazon DynamoDB │   │
+│  │  Jobs Table         │  │  Agent Memory       │  │  Analytics       │   │
+│  │                     │  │                     │  │                  │   │
+│  │  • Job tracking     │  │  • Successful       │  │  • Usage stats   │   │
+│  │  • Status updates   │  │    strategies       │  │  • Performance   │   │
+│  │  • Results          │  │  • Learning data    │  │    metrics       │   │
+│  └─────────────────────┘  └─────────────────────┘  └──────────────────┘   │
+│                                                                              │
+│  ┌─────────────────────┐                      ┌──────────────────────┐     │
+│  │  Amazon S3          │                      │  Amazon S3           │     │
+│  │  Input Bucket       │                      │  Output Bucket       │     │
+│  │                     │                      │                      │     │
+│  │  • Original resumes │                      │  • Optimized resumes │     │
+│  │  • Job descriptions │                      │  • Lifecycle: 90 days│     │
+│  └─────────────────────┘                      └──────────────────────┘     │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  NOTIFICATION & MONITORING LAYER                                             │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─────────────────────┐  ┌─────────────────────┐  ┌──────────────────┐   │
+│  │  Amazon SNS         │  │  Amazon CloudWatch  │  │  AWS X-Ray       │   │
+│  │                     │  │                     │  │                  │   │
+│  │  • Email alerts     │  │  • Logs             │  │  • Tracing       │   │
+│  │  • Optimization     │  │  • Metrics          │  │  • Performance   │   │
+│  │    complete         │  │  • Dashboards       │  │    analysis      │   │
+│  │  • Error alerts     │  │  • Alarms           │  │                  │   │
+│  └─────────────────────┘  └─────────────────────┘  └──────────────────┘   │
+│                                                                              │
+│                              👤 User receives email                          │
+│                              with optimized resume                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  SECURITY & GOVERNANCE LAYER                                                 │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─────────────────────┐  ┌─────────────────────┐  ┌──────────────────┐   │
+│  │  AWS IAM            │  │  AWS Secrets        │  │  Amazon GuardDuty│   │
+│  │                     │  │  Manager            │  │                  │   │
+│  │  • Roles            │  │                     │  │  • Threat        │   │
+│  │  • Policies         │  │  • API keys         │  │    detection     │   │
+│  │  • Least privilege  │  │  • Credentials      │  │  • Security      │   │
+│  └─────────────────────┘  └─────────────────────┘  └──────────────────┘   │
+│                                                                              │
+│  ┌─────────────────────┐                                                    │
+│  │  AWS CloudTrail     │                                                    │
+│  │                     │                                                    │
+│  │  • Audit logs       │                                                    │
+│  │  • Compliance       │                                                    │
+│  └─────────────────────┘                                                    │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  INFRASTRUCTURE AS CODE                                                      │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│                         ┌────────────────────────┐                          │
+│                         │  Terraform             │                          │
+│                         │                        │                          │
+│                         │  • 35+ AWS Resources   │                          │
+│                         │  • State Management    │                          │
+│                         │  • Version Control     │                          │
+│                         └────────────────────────┘                          │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 🤖 Agentic AI Decision Tree
+## Data Flow Sequence
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                              AGENTIC AI DECISION FLOW                                    │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
+1. User Upload
+   └─► S3 (Input Bucket)
+       └─► S3 Event Notification
+           └─► Lambda (S3 Trigger)
+               └─► Textract (PDF → Text)
+                   └─► Step Functions (Start Execution)
 
-START: Resume + Job Description Uploaded
-        │
-        ▼
-┌─────────────────┐
-│   PERCEIVE      │ ──────► What type of job is this?
-│   (Analyze)     │         ├─ Technical (Python, AWS, etc.)
-└─────────────────┘         ├─ Management (Leadership, Strategy)
-        │                   └─ Creative (Design, Marketing)
-        ▼
-┌─────────────────┐
-│     PLAN        │ ──────► What strategy should I use?
-│  (Strategy)     │         ├─ Query memory: What worked before?
-└─────────────────┘         ├─ Skill gaps: 12 missing keywords
-        │                   └─ Choose: keyword_optimization
-        ▼
-┌─────────────────┐
-│      ACT        │ ──────► Generate 3 versions in parallel:
-│   (Generate)    │         ├─ Keywords Version (focus on missing skills)
-└─────────────────┘         ├─ Achievement Version (quantify results)
-        │                   └─ Structure Version (improve format)
-        ▼
-┌─────────────────┐
-│   EVALUATE      │ ──────► Score each version:
-│    (Score)      │         ├─ Keywords: 78/100 (good keywords, weak achievements)
-└─────────────────┘         ├─ Achievement: 82/100 (strong results, missing keywords)
-        │                   └─ Structure: 75/100 (clean format, generic content)
-        ▼
-┌─────────────────┐
-│    DECIDE       │ ──────► Is quality sufficient?
-│ (Quality Check) │         ├─ Best score: 82/100
-└─────────────────┘         ├─ Target: 85/100
-        │                   └─ Decision: NO, iterate!
-        ▼
-┌─────────────────┐
-│    ITERATE      │ ──────► Improve based on evaluation:
-│  (Iteration 2)  │         ├─ Combine best of keywords + achievements
-└─────────────────┘         ├─ Add missing technical terms
-        │                   └─ Enhance quantified results
-        ▼
-┌─────────────────┐
-│   GENERATE      │ ──────► Generate improved versions:
-│  (Iteration 2)  │         ├─ Keywords: 88/100 ✓ (TARGET MET!)
-└─────────────────┘         ├─ Achievement: 85/100 ✓
-        │                   └─ Structure: 80/100
-        ▼
-┌─────────────────┐
-│    DECIDE       │ ──────► Quality check:
-│ (Final Check)   │         ├─ Best score: 88/100
-└─────────────────┘         ├─ Target: 85/100
-        │                   └─ Decision: YES, success! ✓
-        ▼
-┌─────────────────┐
-│     LEARN       │ ──────► Store successful strategy:
-│   (Memory)      │         ├─ Strategy: keyword_optimization
-└─────────────────┘         ├─ Job type: technical
-        │                   ├─ Success score: 88
-        ▼                   └─ Iterations needed: 2
-┌─────────────────┐
-│    COMPLETE     │ ──────► Deliver results:
-│   (Output)      │         ├─ Save best resume to S3
-└─────────────────┘         ├─ Send email notification
-                            └─ Update job status: COMPLETED
+2. Agentic AI Workflow
+   ├─► PERCEIVE: Lambda (Analyze) + Bedrock + Comprehend
+   │   └─► Analysis Results
+   │
+   ├─► PLAN: Lambda (Plan) + DynamoDB (Memory) + Bedrock
+   │   └─► Optimization Strategy
+   │
+   ├─► ACT: 3x Lambda (Generate) in Parallel + Bedrock
+   │   └─► 3 Optimized Versions
+   │
+   ├─► EVALUATE: Lambda (Evaluate)
+   │   └─► Scores + Best Version
+   │
+   └─► Decision: Score >= 85% OR Iteration >= 3?
+       ├─► NO: Increment Iteration → Loop to ACT
+       └─► YES: LEARN
+           └─► Lambda (Learn)
+               ├─► DynamoDB (Store Strategy)
+               ├─► S3 (Save Optimized Resume)
+               ├─► DynamoDB (Update Job Status)
+               └─► SNS (Email Notification)
+
+3. Event Publishing (Throughout Workflow)
+   └─► EventBridge Custom Bus
+       └─► Event Archive (30 days retention)
+
+4. Monitoring & Logging
+   ├─► CloudWatch Logs (All Lambda functions)
+   ├─► CloudWatch Metrics (Performance)
+   └─► X-Ray (Distributed tracing)
 ```
 
-## 📊 Component Interaction Matrix
+## AWS Services Summary
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                            COMPONENT INTERACTION MATRIX                                   │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
+| Category | Services Used |
+|----------|---------------|
+| **Compute** | Lambda (6 functions), Step Functions |
+| **AI/ML** | Bedrock (Claude 3), Comprehend, Textract |
+| **Storage** | S3 (2 buckets), DynamoDB (3 tables) |
+| **Integration** | EventBridge, SQS, SNS, API Gateway |
+| **Security** | IAM, Secrets Manager, GuardDuty |
+| **Monitoring** | CloudWatch, X-Ray, CloudTrail |
+| **IaC** | Terraform |
 
-                    │ S3  │EventB│Step │API │Analy│Plan│Gen │Eval│Learn│DDB │SNS │
-                    │Input│ridge │Func │GW  │ze   │    │erate│uate│     │    │    │
-────────────────────┼─────┼──────┼─────┼────┼─────┼────┼─────┼────┼─────┼────┼────┤
-S3 Input Bucket     │  -  │  ✓   │  -  │ -  │  -  │ -  │  -  │ -  │  -  │ -  │ -  │
-EventBridge Bus     │  ✓  │  -   │  ✓  │ -  │  -  │ -  │  -  │ -  │  -  │ -  │ -  │
-Step Functions      │  -  │  ✓   │  -  │ ✓  │  ✓  │ ✓  │  ✓  │ ✓  │  ✓  │ ✓  │ -  │
-API Gateway         │  -  │  -   │  ✓  │ -  │  -  │ -  │  -  │ -  │  -  │ ✓  │ -  │
-Analyze Lambda      │  ✓  │  ✓   │  ✓  │ -  │  -  │ -  │  -  │ -  │  -  │ ✓  │ -  │
-Plan Lambda         │  -  │  ✓   │  ✓  │ -  │  ✓  │ -  │  -  │ -  │  -  │ ✓  │ -  │
-Generate Lambda     │  -  │  ✓   │  ✓  │ -  │  -  │ ✓  │  -  │ -  │  -  │ ✓  │ -  │
-Evaluate Lambda     │  -  │  ✓   │  ✓  │ -  │  -  │ -  │  ✓  │ -  │  -  │ ✓  │ -  │
-Learn Lambda        │  ✓  │  ✓   │  ✓  │ -  │  -  │ -  │  -  │ ✓  │  -  │ ✓  │ ✓  │
-DynamoDB Tables     │  -  │  -   │  -  │ ✓  │  ✓  │ ✓  │  ✓  │ ✓  │  ✓  │ -  │ -  │
-SNS Notifications   │  -  │  -   │  -  │ -  │  -  │ -  │  -  │ -  │  ✓  │ -  │ -  │
-
-Legend: ✓ = Direct interaction, - = No direct interaction
-```
-
-## 🔐 Security Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                                SECURITY LAYERS                                           │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   NETWORK       │    │      IAM        │    │   ENCRYPTION    │
-│   SECURITY      │    │   SECURITY      │    │   SECURITY      │
-│                 │    │                 │    │                 │
-│ • VPC (Optional)│    │ • Least         │    │ • S3: AES-256   │
-│ • Security      │    │   Privilege     │    │ • DDB: AES-256  │
-│   Groups        │    │ • Role-based    │    │ • Lambda: KMS   │
-│ • NACLs         │    │   Access        │    │ • SNS: TLS 1.2+ │
-│ • API Gateway   │    │ • Cross-service │    │ • API: HTTPS    │
-│   Throttling    │    │   Roles         │    │   Only          │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   MONITORING    │    │   COMPLIANCE    │    │   DATA PRIVACY  │
-│   SECURITY      │    │   SECURITY      │    │   SECURITY      │
-│                 │    │                 │    │                 │
-│ • CloudTrail    │    │ • GDPR Ready    │    │ • PII Masking   │
-│ • CloudWatch    │    │ • SOC 2 Type 2  │    │ • Data          │
-│   Logs          │    │ • ISO 27001     │    │   Retention     │
-│ • X-Ray Tracing │    │ • HIPAA Ready   │    │ • Right to      │
-│ • Security      │    │ • Audit Logs    │    │   Delete        │
-│   Alerts        │    │ • Compliance    │    │ • Anonymization │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
-
-## 💰 Cost Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                                COST BREAKDOWN                                            │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-
-PER RESUME PROCESSING:
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   COMPUTE       │    │      AI         │    │    STORAGE     │
-│   $0.0001       │    │   $0.0040       │    │   $0.0003      │
-│                 │    │                 │    │                 │
-│ • Lambda Exec   │    │ • Bedrock       │    │ • S3 Storage    │
-│ • Step Functions│    │   (Claude)      │    │ • DynamoDB      │
-│ • API Gateway   │    │ • Textract      │    │ • SQS Messages  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-
-MONTHLY (1000 RESUMES):
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   FREE TIER     │    │    PAID TIER    │    │     TOTAL       │
-│   $0.50         │    │    $5.50        │    │    $6.00        │
-│                 │    │                 │    │                 │
-│ • Lambda (1M)   │    │ • Bedrock       │    │ • Highly        │
-│ • S3 (5GB)      │    │ • Textract      │    │   Cost-         │
-│ • DynamoDB      │    │ • Comprehend    │    │   Effective     │
-│   (25GB)        │    │ • Step Func     │    │ • Serverless    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
-
-## 🚀 Deployment Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                              DEPLOYMENT PIPELINE                                         │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-
-DEVELOPER MACHINE          EC2 INSTANCE              AWS CLOUD
-┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
-│                 │       │                 │       │                 │
-│ • Code Changes  │──────►│ • Terraform     │──────►│ • Infrastructure│
-│ • Git Commit    │       │ • AWS CLI       │       │ • Lambda Deploy │
-│ • Local Testing │       │ • Ubuntu 22.04  │       │ • Service Config│
-│                 │       │                 │       │                 │
-└─────────────────┘       └─────────────────┘       └─────────────────┘
-        │                          │                          │
-        ▼                          ▼                          ▼
-┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
-│ DEVELOPMENT     │       │ STAGING         │       │ PRODUCTION      │
-│                 │       │                 │       │                 │
-│ • Local IDE     │       │ • terraform     │       │ • Live System   │
-│ • Unit Tests    │       │   plan/apply    │       │ • Real Users    │
-│ • Code Review   │       │ • Integration   │       │ • Monitoring    │
-│                 │       │   Tests         │       │ • Alerts        │
-└─────────────────┘       └─────────────────┘       └─────────────────┘
-```
-
-## 📈 Scalability Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                              SCALABILITY DESIGN                                          │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-
-CURRENT SCALE (1-100 resumes/day):
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   LAMBDA        │    │   DYNAMODB      │    │      S3         │
-│                 │    │                 │    │                 │
-│ • 1000 Concurrent│    │ • On-Demand     │    │ • Unlimited     │
-│ • Auto-scaling  │    │ • Auto-scaling  │    │ • 11 9's        │
-│ • 15min timeout │    │ • Global Tables │    │   Durability    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-
-ENTERPRISE SCALE (10,000+ resumes/day):
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   ENHANCED      │    │   OPTIMIZED     │    │   DISTRIBUTED   │
-│                 │    │                 │    │                 │
-│ • Reserved      │    │ • Provisioned   │    │ • Multi-Region  │
-│   Concurrency   │    │   Capacity      │    │ • CDN           │
-│ • Provisioned   │    │ • DAX Caching   │    │ • Edge          │
-│   Concurrency   │    │ • Read Replicas │    │   Locations     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
-
----
-
-## 🎯 Key Architectural Decisions
-
-### 1. **Event-Driven Architecture**
-- **Why:** Loose coupling, scalability, resilience
-- **How:** Custom EventBridge bus with event choreography
-- **Benefit:** Services react independently, easy to extend
-
-### 2. **Agentic AI with Step Functions**
-- **Why:** Visual workflow, error handling, state management
-- **How:** State machine orchestrates 5 agent phases
-- **Benefit:** Observable, debuggable, maintainable AI workflow
-
-### 3. **Serverless-First Design**
-- **Why:** Cost optimization, auto-scaling, no server management
-- **How:** Lambda, DynamoDB, S3, API Gateway
-- **Benefit:** Pay-per-use, infinite scale, high availability
-
-### 4. **Multi-Model AI Approach**
-- **Why:** Best tool for each task
-- **How:** Bedrock (reasoning), Textract (OCR), Comprehend (NLP)
-- **Benefit:** Optimal accuracy and cost for each AI task
-
-### 5. **Agent Memory System**
-- **Why:** Learning and improvement over time
-- **How:** DynamoDB table stores successful strategies
-- **Benefit:** Agent gets smarter with each optimization
-
----
-
-## 🔍 Architecture Validation Checklist
-
-### ✅ **Well-Architected Framework**
-- **Operational Excellence:** CloudWatch, X-Ray, automated deployment
-- **Security:** IAM least privilege, encryption, VPC-ready
-- **Reliability:** Multi-AZ, error handling, DLQ, retries
-- **Performance:** Serverless auto-scaling, parallel processing
-- **Cost Optimization:** Pay-per-use, right-sizing, monitoring
-- **Sustainability:** Serverless reduces carbon footprint
-
-### ✅ **Agentic AI Principles**
-- **Autonomy:** Agent makes its own decisions
-- **Reactivity:** Responds to events and environment changes
-- **Proactivity:** Works toward goals (ATS score >= 85)
-- **Social Ability:** Interacts with multiple AI services
-- **Learning:** Improves performance over time
-
-### ✅ **Production Readiness**
-- **Monitoring:** CloudWatch, X-Ray, custom metrics
-- **Error Handling:** Try-catch, DLQ, exponential backoff
-- **Security:** Encryption, IAM, audit logging
-- **Scalability:** Auto-scaling, parallel processing
-- **Maintainability:** Infrastructure as Code, modular design
-
----
-
-This architecture demonstrates enterprise-grade AWS patterns with cutting-edge agentic AI capabilities, making it perfect for showcasing advanced cloud and AI expertise! 🚀
+**Total: 15+ AWS Services, 35+ Resources**
