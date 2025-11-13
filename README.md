@@ -11,11 +11,13 @@ An intelligent AI agent that:
 - 🎯 Improves ATS scores by 20-30 points
 - ✨ Uses AWS Bedrock (Claude), Textract, and Comprehend
 
-## 🏗️ Architecture Overview
+## 🏗️ Architecture Diagram
+
+![AI Resume Optimizer Architecture](architecture-diagram.png)
 
 > **Complete system architecture with 15+ AWS services, agentic AI workflow, and event-driven patterns**
 
-📊 **[View Detailed Architecture Diagram →](ARCHITECTURE_DIAGRAM.md)**
+📊 **[View Detailed Architecture Documentation →](ARCHITECTURE_DIAGRAM.md)**
 
 ## 🏗️ Agentic AI Architecture
 
