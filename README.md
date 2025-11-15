@@ -11,6 +11,15 @@ An intelligent AI agent that:
 - 🎯 Improves ATS scores by 20-30 points
 - ✨ Uses AWS Bedrock (Claude), Textract, and Comprehend
 
+## 🎥 Demo Video
+
+> **Coming Soon:** Watch the AI Resume Optimizer in action - from upload to optimized resume in 90 seconds!
+
+<!-- Uncomment when video is ready:
+[![AI Resume Optimizer Demo](demo-thumbnail.png)](demo-video.mp4)
+*Click to watch: Agentic AI optimizing a resume in real-time*
+-->
+
 ## 🏗️ Architecture Diagram
 
 ![AI Resume Optimizer Architecture](architecture-diagram.png)
