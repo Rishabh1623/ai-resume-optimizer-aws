@@ -2,10 +2,14 @@
 
 > **Autonomous AI agent that optimizes resumes using AWS serverless architecture**
 
+**Built by:** [Rishabh Madne](https://www.linkedin.com/in/rmadne-cloud/) | [Portfolio](https://rishabhmadne.com/) | [Email](mailto:rishabhmadne16@outlook.com)
+
 [![AWS](https://img.shields.io/badge/AWS-Serverless-orange)](https://aws.amazon.com)
 [![Terraform](https://img.shields.io/badge/IaC-Terraform-purple)](https://terraform.io)
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Rishabh_Madne-blue?logo=linkedin)](https://www.linkedin.com/in/rmadne-cloud/)
+[![Portfolio](https://img.shields.io/badge/Portfolio-rishabhmadne.com-green)](https://rishabhmadne.com/)
 
 ## Overview
 
@@ -133,6 +137,26 @@ terraform destroy
 - Security (IAM least privilege, encryption)
 - Monitoring (CloudWatch, X-Ray)
 - Cost optimization (~$6/month for 1000 resumes)
+
+## About the Developer
+
+**Rishabh Madne**
+
+Cloud Engineer specializing in AWS serverless architecture and AI/ML integration.
+
+📧 [rishabhmadne16@outlook.com](mailto:rishabhmadne16@outlook.com)  
+💼 [LinkedIn](https://www.linkedin.com/in/rmadne-cloud/)  
+💻 [GitHub](https://github.com/Rishabh1623)  
+🌐 [Portfolio](https://rishabhmadne.com/)  
+📍 New York City Metropolitan Area
+
+**Skills Demonstrated in This Project:**
+- AWS Serverless Architecture (Step Functions, Lambda, S3, DynamoDB, EventBridge)
+- AI/ML Integration (Bedrock Claude 3, Textract, Comprehend)
+- Infrastructure as Code (Terraform)
+- Event-Driven Architecture & Microservices
+- Python Development & Automation
+- DevOps Best Practices
 
 ## License
 
