@@ -402,7 +402,7 @@ resource "aws_iam_role_policy" "step_functions" {
 }
 
 # ============================================================================
-# LAMBDA FUNCTIONS - Agentic AI Components   Rishabhmadne
+# LAMBDA FUNCTIONS - Agentic AI Components   
 # ============================================================================
 data "archive_file" "lambda" {
   type        = "zip"

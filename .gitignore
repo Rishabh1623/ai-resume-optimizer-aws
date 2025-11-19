@@ -1,12 +1,23 @@
 # Terraform
 *.tfstate
 *.tfstate.*
+*.tfstate.backup
 *.tfvars
 !terraform.tfvars.example
 .terraform/
 .terraform.lock.hcl
 terraform.tfplan
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Lambda deployment packages
 lambda.zip
+*.zip
+lambda/package/
 
 # Python
 __pycache__/
@@ -17,9 +28,15 @@ __pycache__/
 env/
 venv/
 ENV/
+env.bak/
+venv.bak/
 *.egg-info/
 dist/
 build/
+.pytest_cache/
+.coverage
+htmlcov/
+*.pyc
 
 # IDE
 .vscode/
@@ -27,18 +44,65 @@ build/
 *.swp
 *.swo
 *~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
 
 # AWS
 .aws/
 *.pem
+*.key
+credentials
+config
 
 # Logs
 *.log
+logs/
+*.log.*
 
 # Temporary files
 *.tmp
 *.bak
+*.swp
+*~
+
+# Documentation artifacts
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.pdf
+!docs/*.png
+!docs/*.jpg
+
+# Personal notes and drafts
+NOTES.md
+TODO.md
+DRAFT_*.md
+*_DRAFT.md
+*-job-description.txt
+*-interview-*.md
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Node modules (if using any JS tooling)
+node_modules/
+
+# Test outputs
+test-results/
+coverage/
