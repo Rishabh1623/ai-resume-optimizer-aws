@@ -142,7 +142,9 @@ terraform destroy
 
 **Rishabh Madne**
 
-Cloud Engineer specializing in AWS serverless architecture and AI/ML integration.
+AWS Solutions Architect | DevOps Engineer specializing in serverless architecture, Infrastructure as Code (Terraform), and event-driven systems.
+
+**Focus Areas:** AWS Solutions Architecture • DevOps & Automation • Serverless & Event-Driven Design
 
 📧 [rishabhmadne16@outlook.com](mailto:rishabhmadne16@outlook.com)  
 💼 [LinkedIn](https://www.linkedin.com/in/rmadne-cloud/)  
@@ -152,11 +154,11 @@ Cloud Engineer specializing in AWS serverless architecture and AI/ML integration
 
 **Skills Demonstrated in This Project:**
 - AWS Serverless Architecture (Step Functions, Lambda, S3, DynamoDB, EventBridge)
+- Infrastructure as Code (Terraform) - 100% automated deployment
+- Event-Driven Architecture with custom EventBridge bus
 - AI/ML Integration (Bedrock Claude 3, Textract, Comprehend)
-- Infrastructure as Code (Terraform)
-- Event-Driven Architecture & Microservices
-- Python Development & Automation
-- DevOps Best Practices
+- DevOps Best Practices (IaC, monitoring, security)
+- Python Development & Cloud Automation
 
 ## License
 
